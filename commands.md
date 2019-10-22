@@ -15,15 +15,22 @@ python -c 'import crypt; print crypt.crypt("password", "$6$random_salt")'
 
 ## Raspberry Pi configuration
 
-Download the [Raspbian Buster Lite](https://www.raspberrypi.org/downloads/raspbian/) image, and write it to the an card:
+Download the [DietPi](https://dietpi.com) image, and write it to the an SD card:
 ```
-unzip -p 2019-09-26-raspbian-buster-lite.zip | sudo dd of=/dev/sdb bs=4M conv=fsync
+sudo dd if=DietPi_v6.25_RPi-ARMv6-Buster.img of=/dev/sdb bs=4M conv=fsync
 ```
 
-Create a file named `ssh` at the root of the Raspberry Pi boot partition
+Mount the boot partition:
 ```
 sudo mount /dev/sdb1 some_folder
-sudo touch some_folder/ssh
+```
+
+In dietpi.txt, update the configuration as below
+* AUTO_SETUP_HEADLESS=1
+* CONFIG_CPU_GOVERNOR=powersave
+
+Unmout the boot partition:
+```
 sudo umount some_folder
 ```
 
