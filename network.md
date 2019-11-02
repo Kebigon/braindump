@@ -1,5 +1,7 @@
 # Network
 
+| IP Address  | What's there               |
+| ----------- | -------------------------- |
 | 192.168.1.1 | DD-WRT Router (DIR-615 H1) |
 | 192.168.1.2 | Raspberry Pi               |
 
