@@ -87,6 +87,10 @@ ufw enable
 ufw status
 ```
 
+## OpenVPN
+
+Use [Nyr's OpenVPN install script][https://github.com/Nyr/openvpn-install].
+
 ## Other configuration
 
 Allow an executable to bind reserved ports without being launched as root:

@@ -63,3 +63,14 @@ Under Services > Services Management > Dnsmasq, add the below under "Additional 
 ```
 dhcp-option=6,192.168.1.2
 ```
+
+## DD-WRT Route configuragion: block P2P
+
+Under Access Restrictions > WAN Access > Add a new policy with the below (leave everything else as default)
+
+| Parameter               | Value                       |
+| ----------------------- | --------------------------- |
+| Status                  | Enable                      |
+| Policy Name             | P2P                         |
+| PCs                     | 192.168.1.0 ~ 192.168.1.254 |
+| Catch all P2P Protocols | Checked                     |
