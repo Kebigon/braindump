@@ -89,7 +89,22 @@ ufw status
 
 ## OpenVPN
 
-Use [Nyr's OpenVPN install script][https://github.com/Nyr/openvpn-install].
+Use [angristan's OpenVPN install script](https://github.com/angristan/openvpn-install).
+
+### Port forwarding
+
+1. Stop the iptables-openvpn service: `service iptables-openvpn stop`
+2. Add to `/etc/iptables/add-openvpn-rules.sh`:
+```
+iptables -t nat -A PREROUTING -d PublicIP -p tcp --dport 51413 -j DNAT --to-dest 10.8.0.2:51413
+iptables -t filter -A INPUT -p tcp -d 10.8.0.2 --dport 51413 -j ACCEPT
+```
+3. Add to `/etc/iptables/rm-openvpn-rules.sh`:
+```
+iptables -t nat -D PREROUTING -d PublicIP -p tcp --dport 51413 -j DNAT --to-dest 10.8.0.2:51413
+iptables -t filter -D INPUT -p tcp -d 10.8.0.2 --dport 51413 -j ACCEPT
+```
+4. Start the iptables-openvpn service: `service iptables-openvpn start`
 
 ## Other configuration
 
