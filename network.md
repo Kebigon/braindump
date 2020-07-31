@@ -1,16 +1,35 @@
 # Network
 
-| IP Address  | What's there               |
-| ----------- | -------------------------- |
-| 192.168.1.1 | DD-WRT Router (DIR-615 H1) |
-| 192.168.1.2 | Raspberry Pi               |
+| IP Address  | What's there               | Usage
+| ----------- | -------------------------- | ------------------- |
+| 192.168.x.1 | DD-WRT Router (DIR-615 H1) | Wifi                |
+| 192.168.x.2 | Raspberry Pi               | DNS and DHCP server |
 
+
+## DD-WRT Router configuration: basic settings
+
+Under Setup > Basic Setup > Network Setup > Router IP, change the Local IP Address.Under Setup > Basic Setup > Network Setup, change the Local IP Address
+
+Under Setup > Basic Setup > Network Setup > Time Settings, change the Time Zone
+
+Under Wireless > Wireless Security, set:
+* Security Mode: WPA2-PSK
+* WPA Algorithms: CCMP-128 (AES)
+* WPA Shared Key: 12 chars with at least 72 bits of entropy
+```
+dd if=/dev/urandom count=1 2>/dev/null | base64 | head -1 | cut -c4-15
+```
+
+Generate a QR code for easy wifi setup:
+```
+qrencode -o wifi.png "WIFI:S:<yournetworkssid>;T:WPA2;P:<wpa2passphrase>;;"
+```
 
 ## Raspberry Pi configuration
 
 Download the [DietPi](https://dietpi.com) image, and write it to the an SD card:
 ```
-sudo dd if=DietPi_v6.25_RPi-ARMv6-Buster.img of=/dev/sdb bs=4M conv=fsync
+sudo dd if=DietPi_RPi-ARMv6-Buster.img of=/dev/sdb bs=4M conv=fsync; sync
 ```
 
 Mount the boot partition:
@@ -27,9 +46,12 @@ Unmout the boot partition:
 sudo umount some_folder
 ```
 
-## DD-WRT Router configuration: Pi-hole's static lease
+Connect to the raspberry pi as root via ssh, default password is `dietpi`, DietPi installer will run on first logon.
 
-Under Services > Services Management > DHCP Server, add a static lease for the Raspberry Pi.
+Run `dietpi-config` tool, and modify the ethernet configuration:
+* Set the static IP to: 192.168.x.2
+* Set the gateway to: 192.168.x.1
+* Purge the wifi packages
 
 ## Pi-hole configuration
 
@@ -38,24 +60,42 @@ Install Pi-hole:
 curl -sSL https://install.pi-hole.net | bash
 ```
 
+
 Set a new password
 ```
 sudo pihole -a -p
 ```
 
-Under Settings > Blocklists, update the configuration to have the below lists:
+Under Group management > Adlists, update the configuration to have the below lists:
 ```
-https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-gambling-porn/hosts
-https://s3.amazonaws.com/lists.disconnect.me/simple_ad.txt
-https://s3.amazonaws.com/lists.disconnect.me/simple_malware.txt
-https://s3.amazonaws.com/lists.disconnect.me/simple_tracking.txt
-https://s3.amazonaws.com/lists.disconnect.me/simple_malvertising.txt
 https://mirror1.malwaredomains.com/files/justdomains
-https://hosts-file.net/ad_servers.txt
-http://sysctl.org/cameleon/hosts
+https://s3.amazonaws.com/lists.disconnect.me/simple_tracking.txt
+https://s3.amazonaws.com/lists.disconnect.me/simple_ad.txt
+https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-gambling-porn/hosts
+https://block.energized.pro/unified/formats/hosts
+https://block.energized.pro/extensions/xtreme/formats/hosts
+https://block.energized.pro/extensions/porn-lite/formats/hosts
+https://block.energized.pro/extensions/regional/formats/hosts
 ```
 
-Under Settings > DNS > Upstream DNS Servers, configure set one of the [OpenNIC](https://www.opennic.org/) DNS server as primary, and the router (192.168.1.1) as the secondary.
+## DD-WRT Router configuration: disable DHCP server
+
+Under Setup > Basic setup > Network Setup > Network Address Server Settings (DHCP):
+* Set DHCP Server to Disable
+
+## Raspberry Pi configuration: DHCP server
+
+Under Settings > DHCP:
+* Check DHCP server enabled
+
+## Unbound configuration
+
+Follow this tutorial: [Pi-hole as All-Around DNS Solution](https://docs.pi-hole.net/guides/unbound/)
+
+Use the below file as root.hints (provided by package `dns-root-data`)
+```
+/usr/share/dns/root.hints
+```
 
 ## DD-WRT Router configuration: Pi-hole as default DNS Server
 
